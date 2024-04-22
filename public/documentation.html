@@ -1,23 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Moonflix</title>
-  </head>
-  <body>
-    <header>
-      <h1>Moonflix</h1>
-    </header>
-    <main>
-      <h2>Objective</h2>
-      <p>
-        To build the server-side component of a “movies” web application. The
-        web application will provide users with access to information about
-        different movies, directors, and genres. Users will be able to sign up,
-        update their personal information, and create a list of their favorite
-        movies.
-      </p>
-    </main>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Moonflix</title>
+    </head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+        body {
+            font-family: 'Lato', sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            line-height: 1.6;
+            font-size: 18px;
+            padding: 15px;
+            margin: 10px;
+            border: 5px solid #ddd;
+        }
+        
+        table,
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table th,
+        table td {
+            padding: 5px;
+        }
+
+        table th {
+            text-align: center;
+        }
+
+        code {
+            font-family: Consolas,"courier new";
+            color: crimson;
+            background-color: #f1f1f1;
+            padding: 2px;
+            font-size: 15px;
+          }
+    </style>
+    <body>
+        <header>
+            <h1>Moonflix</h1>
+        </header>
+        <main>
+            <h2>Objective</h2>
+            <p>
+                To build the server-side component of a “movies” web
+                application. The web application will provide users with access
+                to information about different movies, directors, and genres.
+                Users will be able to sign up, update their personal
+                information, and create a list of their favorite movies.
+            </p>
+            <h2>Endpoints</h2>
+            <h3>Movies</h3>
+            <table>
+                <tr>
+                    <th>REQUEST</th>
+                    <th>URL</th>
+                    <th>HTTP METHOD</th>
+                    <th>REQUEST DATA BODY FORMAT</th>
+                    <th>RESPONSE DATA BODY FORMAT</th>
+                </tr>
+                <tr>
+                    <td>Return a list of ALL movies to the user.</td>
+                    <td>/movies</td>
+                    <td>GET</td>
+                    <td>None</td>
+                    <td>
+                        A JSON object holding data about all the movies and
+                        status code <code>200</code> if sucessful.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Return data (description, genre, director, image URL,
+                        whether it is featured or not) about a single movie by
+                        title to the user.
+                    </td>
+                    <td>/movies/[title]</td>
+                    <td>GET</td>
+                    <td>None</td>
+                    <td>
+                        A JSON object holding data about the movie containing
+                        the title and status code <code>200</code> if sucessful.
+                        Example:
+                        <code
+                            >{ "title": "Inception", "description": "A thief who
+                            enters the dreams of others to steal their
+                            secrets.", "genre": { "name": "Science Fiction",
+                            "description": "Fictional science that explores the
+                            possibilities of the future." }, "director": {
+                            "name": "Christopher Nolan", "biography":
+                            "Christopher Nolan is a British-American film
+                            director, screenwriter, and producer. He is known
+                            for his distinctive filmmaking style and intricate,
+                            non-linear storytelling.", "birth_year": 1970 },
+                            imgURL: "", "featured": true }</code
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Return data about a genre (description) by genre name.
+                    </td>
+                    <td>/movies/genre/[genreName]</td>
+                    <td>GET</td>
+                    <td>None</td>
+                    <td>
+                        A JSON object holding data about the genre and status
+                        code <code>200</code> if sucessful. Example:
+                        <code
+                            >{ "name": "Science Fiction", "description":
+                            "Fictional science that explores the possibilities
+                            of the future." }</code
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Return data about a director (bio, birth year, death
+                        year) by name.
+                    </td>
+                    <td>/movies/directors/[directorName]</td>
+                    <td>GET</td>
+                    <td>None</td>
+                    <td>
+                        A JSON object holding data about the director containing
+                        the name and status code <code>200</code> if sucessful.
+                        Example:
+                        <code
+                            >{ "name": "Christopher Nolan", "bio": "Christopher
+                            Nolan is a British-American film director,
+                            screenwriter, and producer. He is known for his
+                            distinctive filmmaking style and intricate,
+                            non-linear storytelling.", "birth_year": 1970
+                            }</code
+                        >
+                    </td>
+                </tr>
+            </table>
+            <h3>Users</h3>
+            <table>
+                <tr>
+                    <th>REQUEST</th>
+                    <th>URL</th>
+                    <th>HTTP METHOD</th>
+                    <th>REQUEST DATA BODY FORMAT</th>
+                    <th>RESPONSE DATA BODY FORMAT</th>
+                </tr>
+                <tr>
+                    <td>Register new user.</td>
+                    <td>/users</td>
+                    <td>POST</td>
+                    <td>
+                        A JSON Object holding information about the new user.
+                        Example:
+                        <code> { "name": "Maria", "favoriteMovies": [] } </code>
+                    </td>
+                    <td>
+                        A JSON Object holding data about the new user and status
+                        code <code>201</code> if created. Example:
+                        <code>
+                            { "id": "123456", "name": "Maria", "favoriteMovies":
+                            [] }
+                        </code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Update a user by id.</td>
+                    <td>/users/:id</td>
+                    <td>PUT</td>
+                    <td>
+                        A JSON Object holding information about the user to
+                        update. Example:
+                        <code>
+                            { "name": "Maria Silva", "favoriteMovies": [] }
+                        </code>
+                    </td>
+                    <td>
+                        A JSON Object holding new data about the updated user
+                        and status code <code>200</code> if sucessful. Example:
+                        <code>
+                            { "id": "123456", "name": "Maria Silva",
+                            "favoriteMovies": [] }
+                        </code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Add a movie to user's list of favorites.</td>
+                    <td>/users/:id/:movieTitle</td>
+                    <td>POST</td>
+                    <td>None</td>
+                    <td>Message confirming that the movie was added.</td>
+                </tr>
+                <tr>
+                    <td>Delete a movie from user's list of favorites.</td>
+                    <td>/users/:id/:movieTitle</td>
+                    <td>DELETE</td>
+                    <td>None</td>
+                    <td>Message confirming that the movie was deleted.</td>
+                </tr>
+                <tr>
+                    <td>Delete user registration.</td>
+                    <td>/users/:id</td>
+                    <td>DELETE</td>
+                    <td>None</td>
+                    <td>Messsage confirming that the email was removed.</td>
+                </tr>
+            </table>
+        </main>
+    </body>
 </html>
