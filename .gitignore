@@ -9,3 +9,6 @@ node_modules/
 
 # Logs
 logs/*
+
+# Except for the .gitkeep file if it exists
+!logs/.gitkeep
