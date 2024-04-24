@@ -78,7 +78,25 @@
                     <td>None</td>
                     <td>
                         A JSON object holding data about all the movies and
-                        status code <code>200</code> if sucessful.
+                        status code <code>200</code> if sucessful. Example: 
+                        <code>[
+                            {
+                                "genre": {
+                                    "name": "Action",
+                                    "description": "Exciting and fast-paced films with lots of physical activity and spectacle."
+                                },
+                                "director": {
+                                    "name": "Steven Spielberg",
+                                    "bio": "An American film director, producer, and screenwriter known for his work in the adventure and science fiction genres.",
+                                    "birth": "1946",
+                                    "death": null
+                                },
+                                "_id": "662808f8d2488e9bc5117b7b",
+                                "title": "Jurassic Park",
+                                "description": "A theme park featuring genetically engineered dinosaurs suffers a major breakdown that allows the dinosaurs to run amok.",
+                                "imagePath": "https://example.com/jurassic_park.jpg",
+                                "featured": true
+                            }]</code>
                     </td>
                 </tr>
                 <tr>
@@ -94,19 +112,23 @@
                         A JSON object holding data about the movie containing
                         the title and status code <code>200</code> if sucessful.
                         Example:
-                        <code
-                            >{ title: 'The Godfather', description: 'The aging
-                            patriarch of an organized crime dynasty transfers
-                            control of his clandestine empire to his reluctant
-                            son.', genre: { name: 'Drama', description: 'Movies
-                            focused on realistic characters, settings, and
-                            stories that evoke emotion.' }, director: { name:
-                            'Francis Ford Coppola', bio: 'An American film
-                            director, producer, and screenwriter.', birth:
-                            '1939', death: null }, imagePath:
-                            'https://example.com/godfather.jpg', featured: true
-                            }</code
-                        >
+                        <code>{
+                                "genre": {
+                                    "name": "Action",
+                                    "description": "Exciting and fast-paced films with lots of physical activity and spectacle."
+                                },
+                                "director": {
+                                    "name": "Christopher Nolan",
+                                    "bio": "A British and American filmmaker. Known for his Hollywood blockbusters with complex storytelling.",
+                                    "birth": "1970",
+                                    "death": null
+                                },
+                                "_id": "662808f8d2488e9bc5117b7f",
+                                "title": "Inception",
+                                "description": "A thief who enters the dreams of others to steal their secrets.",
+                                "imagePath": "https://example.com/inception.jpg",
+                                "featured": false
+                            }</code>
                     </td>
                 </tr>
                 <tr>
@@ -138,9 +160,12 @@
                         A JSON object holding data about the director containing
                         the name and status code <code>200</code> if sucessful.
                         Example:
-                        <code>{ name: 'Francis Ford Coppola', bio: 'An American
-                            film director, producer, and screenwriter.', birth:
-                            '1939', death: null }</code>
+                        <code>{
+                            "name": "Quentin Tarantino",
+                            "bio": "An American film director, screenwriter, and actor known for his nonlinear storytelling and stylized violence.",
+                            "birth": "1963",
+                            "death": null
+                        }</code>
                     </td>
                 </tr>
             </table>
@@ -154,6 +179,51 @@
                     <th>RESPONSE DATA BODY FORMAT</th>
                 </tr>
                 <tr>
+                    <td>Get all users.</td>
+                    <td>/users</td>
+                    <td>GET</td>
+                    <td>None</td>
+                    <td>
+                        A JSON Object holding data about the new user and status
+                        code <code>200</code> if sucessful. Example:
+                        <code>[
+                            {
+                                "_id": "66280fe5b18a52052d117b7b",
+                                "username": "user1",
+                                "password": "teste123",
+                                "email": "email@example.com",
+                                "favoriteMovies": [
+                                    "662808f8d2488e9bc5117b7b",
+                                    "662808f8d2488e9bc5117b7c"
+                                ],
+                                "birthday": "1985-03-15T00:00:00.000Z"
+                            }]
+                        </code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Get user by username.</td>
+                    <td>/users/:username</td>
+                    <td>GET</td>
+                    <td>None</td>
+                    <td>
+                        A JSON Object holding data about the new user and status
+                        code <code>200</code> if sucessful. Example:
+                        <code>{
+                            "_id": "66280fe5b18a52052d117b7f",
+                            "username": "user5",
+                            "password": "teste123",
+                            "email": "email5@example.com",
+                            "favoriteMovies": [
+                                "662808f8d2488e9bc5117b82",
+                                "662808f8d2488e9bc5117b83"
+                            ],
+                            "birthday": "1980-09-28T00:00:00.000Z"
+                        }
+                        </code>
+                    </td>
+                </tr>
+                <tr>
                     <td>Register new user.</td>
                     <td>/users</td>
                     <td>POST</td>
@@ -164,8 +234,7 @@
                             username: 'user4',
                             password: 'password4',
                             email: 'user4@example.com',
-                            birth: '1993-05-03',
-                            favoriteMovies: [ name: 'Titanic' ]
+                            birth: '1993-05-03'
                           } </code>
                     </td>
                     <td>
@@ -175,56 +244,91 @@
                             username: 'user4',
                             password: 'password4',
                             email: 'user4@example.com',
-                            birth: '1993-05-03',
-                            favoriteMovies: [ name: 'Titanic' ]}
+                            birth: '1993-05-03'}
                         </code>
                     </td>
                 </tr>
                 <tr>
-                    <td>Update a user by id.</td>
-                    <td>/users/:id</td>
+                    <td>Update a user by username.</td>
+                    <td>/users/:username</td>
                     <td>PUT</td>
                     <td>
                         A JSON Object holding information about the user to
                         update. Example:
                         <code>
-                            { "name": "Maria Silva",
-                            "email": "user4@example.com",
-                            "birth": "1993-05-03",
-                            "favoriteMovies": [] }
+                            {
+                                "username": "user5",
+                                "password": "teste123",
+                                "email": "email5@example.com",
+                                "birthday": "1980-09-28T00:00:00.000Z"
+                            }
                         </code>
                     </td>
                     <td>
                         A JSON Object holding new data about the updated user
                         and status code <code>200</code> if sucessful. Example:
                         <code>
-                            { "id": "123456", "name": "Maria Silva",
-                            "email": "user4@example.com",
-                            "birth": "1993-05-03",
-                            "favoriteMovies": [] }
+                            {
+                                "_id": "66280fe5b18a52052d117b7f",
+                                "username": "user5",
+                                "password": "teste123",
+                                "email": "email5@example.com",
+                                "favoriteMovies": [
+                                    "662808f8d2488e9bc5117b82",
+                                    "662808f8d2488e9bc5117b83"
+                                ],
+                                "birthday": "1980-09-28T00:00:00.000Z"
+                            }
                         </code>
                     </td>
                 </tr>
                 <tr>
                     <td>Add a movie to user's list of favorites.</td>
-                    <td>/users/:id/:movieTitle</td>
+                    <td>/users/:username/movies/:movieId</td>
                     <td>POST</td>
                     <td>None</td>
-                    <td>Message confirming that the movie was added.</td>
+                    <td>A JSON Object holding new data about the updated user
+                        and status code <code>200</code> if sucessful. Example:
+                        <code>{
+                            "_id": "66280fe5b18a52052d117b7f",
+                            "username": "user5",
+                            "password": "teste123",
+                            "email": "email5@example.com",
+                            "favoriteMovies": [
+                                "662808f8d2488e9bc5117b82",
+                                "662808f8d2488e9bc5117b83",
+                                "662808f8d2488e9bc5117b7e"
+                            ],
+                            "birthday": "1980-09-28T00:00:00.000Z"
+                        }</code>
+                    </td>
                 </tr>
                 <tr>
                     <td>Delete a movie from user's list of favorites.</td>
-                    <td>/users/:id/:movieTitle</td>
+                    <td>/users/{username}/movies/{movieId}</td>
                     <td>DELETE</td>
                     <td>None</td>
-                    <td>Message confirming that the movie was deleted.</td>
+                    <td>A JSON Object holding new data about the updated user
+                        and status code <code>200</code> if sucessful. Example:
+                    <code>{
+                        "_id": "66280fe5b18a52052d117b7f",
+                        "username": "user5",
+                        "password": "teste123",
+                        "email": "email5@example.com",
+                        "favoriteMovies": [
+                            "662808f8d2488e9bc5117b82",
+                            "662808f8d2488e9bc5117b83"
+                        ],
+                        "birthday": "1980-09-28T00:00:00.000Z"
+                    }</code>
+                </td>
                 </tr>
                 <tr>
                     <td>Delete user registration.</td>
-                    <td>/users/:id</td>
+                    <td>/users/:username</td>
                     <td>DELETE</td>
                     <td>None</td>
-                    <td>Messsage confirming that the email was removed.</td>
+                    <td>Messsage confirming that the user was removed.</td>
                 </tr>
             </table>
         </main>
