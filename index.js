@@ -5,7 +5,8 @@ const express = require('express'),
     swaggerUi = require('swagger-ui-express'),
     swaggerSpec = require('./swagger'),
     mongoose = require('mongoose'),
-    Models = require('./js/models');
+    Models = require('./js/models'),
+    {check, validationResult} = require('express-validator');
 
 const app = express();
 const Movies = Models.Movie;
@@ -16,15 +17,28 @@ mongoose.connect('mongodb://localhost:27017/moonflixdb');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use(morgan('combined', {stream: fs.createWriteStream(__dirname + '/logs/data.log', {flags: 'a',}),}));
+
+let auth = require('./js/auth')(app);
+const passport = require('passport');
+require('./js/passport');
+const cors = require('cors');
+let allowedOrigins = ['http://localhost:8080'];
+app.use(cors({
+  origin: (origin, callback) => {
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){ // If a specific origin isn’t found on the list of allowed origins
+      let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
+      return callback(new Error(message ), false);
+    }
+    return callback(null, true);
+  }
+}));
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something is wrong!');
 });
-
-let auth = require('./js/auth')(app);
-const passport = require('passport');
-require('./js/passport');
 
 /**
  * @swagger
@@ -169,7 +183,24 @@ app.get('/movies/directors/:directorName', passport.authenticate('jwt', { sessio
  *                      email cannot be empty
  *                      password cannot be empty
  */
-app.post('/users', async (req, res) => {
+app.post('/users',
+    // Validation logic here for request
+    [
+        check('username', 'Username is required. Min: 5 characteres.').isLength({min: 5}),
+        check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('password', 'Password is required').not().isEmpty(),
+        check('password', 'Password must contains at least 8 characteres.').isLength({min: 8}),
+        check('email', 'Email does not appear to be valid').isEmail()
+    ], async (req, res) => {
+
+    // check the validation object for errors
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    let hashedPassword = Users.hashPassword(req.body.password);
     await Users.findOne({ username: req.body.username})
         .then((user) => {
             if(user) {
@@ -178,7 +209,7 @@ app.post('/users', async (req, res) => {
                 Users
                     .create({
                         username: req.body.username,
-                        password: req.body.password,
+                        password: hashedPassword,
                         email: req.body.email,
                         birthday: req.body.birthday
                     })
@@ -270,9 +301,6 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), as
  *             username:
  *               type: string
  *               description: The new username
- *             password:
- *               type: string
- *               description: The user's new password
  *             email:
  *               type: string
  *               format: email
@@ -287,17 +315,31 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), as
  *       500:
  *         description: Error description
  */
-app.put('/users/:username', passport.authenticate('jwt', { session: false }), async (req, res) => {
+app.put('/users/:username', 
+    // Validation logic here for request
+    [
+        check('username', 'Username is required. Min: 5 characteres.').isLength({min: 5}),
+        check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('email', 'Email does not appear to be valid').isEmail(),
+        check('birthday', 'Birthday must be a valid date in the format YYYY-MM-DD').optional().isISO8601(), // Add date validation for birthday field
+    ], passport.authenticate('jwt', { session: false }), async (req, res) => {
+    
     // Checks if the logged user is trying to update someone else's info.
     if(req.user.username !== req.params.username) {
         return res.status(403).send('Permission denied');
+    }
+
+    // check the validation object for errors
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
     }
 
     await Users.findOneAndUpdate({username: req.params.username},
     { $set: 
         {
             username: req.body.username,
-            password: req.body.password,
             email: req.body.email,
             birthday: req.body.birthday
         }
@@ -438,6 +480,7 @@ app.delete('/users/:username', passport.authenticate('jwt', { session: false }),
       });
   });
 
-app.listen(8080, () => {
-    console.log('The app is listening on port 8080.');
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0',() => {
+    console.log('Listening on Port ' + port);
 });
