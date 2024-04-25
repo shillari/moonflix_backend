@@ -9,10 +9,17 @@ Moonflix backend is the server-side component of a “movies” web application.
 ## Dependencies
 - Body-parser: v1.20.2
 - Express: v4.19.2
+- Jsonwebtoken: v9.0.2
 - Mongoose: v8.3.2
 - Morgan: v1.10.0
+- Passport: v0.7.0
+- Passport-jwt: v4.0.1
+- Passport-local: v1.0.0
 - Swagger-jsdoc: v6.2.8
 - Swagger-ui-express: v5.0.0
+
+## Authentication/Authorization
+The API employs basic authentication for login functionality and JSON Web Tokens (JWT) for authorization.
 
 ## Documentation
 - Swagger documentation is available at `/api-docs`
