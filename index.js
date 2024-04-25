@@ -1,12 +1,11 @@
 const express = require('express'),
     morgan = require('morgan'),
     fs = require('fs'),
-    uuid = require('uuid'),
     bodyParser = require('body-parser'),
     swaggerUi = require('swagger-ui-express'),
     swaggerSpec = require('./swagger'),
     mongoose = require('mongoose'),
-    Models = require('./models');
+    Models = require('./js/models');
 
 const app = express();
 const Movies = Models.Movie;
@@ -23,6 +22,10 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something is wrong!');
 });
 
+let auth = require('./js/auth')(app);
+const passport = require('passport');
+require('./js/passport');
+
 /**
  * @swagger
  * /movies:
@@ -34,7 +37,7 @@ app.use((err, req, res, next) => {
  *       500:
  *         description: Error description
  */
-app.get('/movies', async (req, res) => {
+app.get('/movies', passport.authenticate('jwt', { session: false }), async (req, res) => {
     await Movies.find()
         .then((movies) => {
             res.status(200).json(movies);
@@ -64,7 +67,7 @@ app.get('/movies', async (req, res) => {
  *         description: Movie not found
  */
 
-app.get('/movies/:title', async (req, res) => {
+app.get('/movies/:title', passport.authenticate('jwt', { session: false }), async (req, res) => {
     await Movies.findOne({title: req.params.title})
         .then((movie) => {
             res.status(200).json(movie);
@@ -93,7 +96,7 @@ app.get('/movies/:title', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.get('/movies/genre/:genreName', async (req, res) => {
+app.get('/movies/genre/:genreName', passport.authenticate('jwt', { session: false }), async (req, res) => {
     await Movies.findOne({'genre.name': req.params.genreName})
         .then((movie) => {
             res.status(200).json(movie.genre);
@@ -122,7 +125,7 @@ app.get('/movies/genre/:genreName', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.get('/movies/directors/:directorName', async (req, res) => {
+app.get('/movies/directors/:directorName', passport.authenticate('jwt', { session: false }), async (req, res) => {
     await Movies.findOne({'director.name': req.params.directorName})
         .then((movie) => {
             res.status(200).json(movie.director);
@@ -203,7 +206,7 @@ app.post('/users', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.get('/users', async (req, res) => {
+app.get('/users', passport.authenticate('jwt', { session: false }), async (req, res) => {
     await Users.find()
         .then((users) => {
             res.status(200).json(users);
@@ -233,7 +236,7 @@ app.get('/users', async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-app.get('/users/:username', async (req, res) => {
+app.get('/users/:username', passport.authenticate('jwt', { session: false }), async (req, res) => {
     await Users.findOne({username: req.params.username})
         .then((user) => {
             res.status(200).json(user);
@@ -284,7 +287,12 @@ app.get('/users/:username', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.put('/users/:username', async (req, res) => {
+app.put('/users/:username', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    // Checks if the logged user is trying to update someone else's info.
+    if(req.user.username !== req.params.username) {
+        return res.status(403).send('Permission denied');
+    }
+
     await Users.findOneAndUpdate({username: req.params.username},
     { $set: 
         {
@@ -328,7 +336,12 @@ app.put('/users/:username', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.post('/users/:username/movies/:movieId', async (req, res) => {
+app.post('/users/:username/movies/:movieId', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    // Checks if the logged user is trying to update someone else's info.
+    if(req.user.username !== req.params.username) {
+        return res.status(403).send('Permission denied');
+    }
+
     await Users.findOneAndUpdate({username: req.params.username},
         {
             $push: {favoriteMovies: req.params.movieId}
@@ -367,7 +380,12 @@ app.post('/users/:username/movies/:movieId', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.delete('/users/:username/movies/:movieId', async (req, res) => {
+app.delete('/users/:username/movies/:movieId', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    // Checks if the logged user is trying to update someone else's info.
+    if(req.user.username !== req.params.username) {
+        return res.status(403).send('Permission denied');
+    }
+    
     await Users.findOneAndUpdate({username: req.params.username},
         {
             $pull: {favoriteMovies: req.params.movieId}
@@ -400,7 +418,12 @@ app.delete('/users/:username/movies/:movieId', async (req, res) => {
  *       500:
  *         description: Error description
  */
-app.delete('/users/:username', async (req, res) => {
+app.delete('/users/:username', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    // Checks if the logged user is trying to delete someone else.
+    if(req.user.username !== req.params.username) {
+        return res.status(403).send('Permission denied');
+    }
+    
     await Users.findOneAndDelete({ username: req.params.username })
       .then((user) => {
         if (!user) {

@@ -68,6 +68,7 @@
                     <th>REQUEST</th>
                     <th>URL</th>
                     <th>HTTP METHOD</th>
+                    <th>AUTHENTICATION</th>
                     <th>REQUEST DATA BODY FORMAT</th>
                     <th>RESPONSE DATA BODY FORMAT</th>
                 </tr>
@@ -75,6 +76,7 @@
                     <td>Return a list of ALL movies to the user.</td>
                     <td>/movies</td>
                     <td>GET</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>
                         A JSON object holding data about all the movies and
@@ -107,6 +109,7 @@
                     </td>
                     <td>/movies/[title]</td>
                     <td>GET</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>
                         A JSON object holding data about the movie containing
@@ -137,6 +140,7 @@
                     </td>
                     <td>/movies/genre/[genreName]</td>
                     <td>GET</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>
                         A JSON object holding data about the genre and status
@@ -155,6 +159,7 @@
                     </td>
                     <td>/movies/directors/[directorName]</td>
                     <td>GET</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>
                         A JSON object holding data about the director containing
@@ -175,6 +180,7 @@
                     <th>REQUEST</th>
                     <th>URL</th>
                     <th>HTTP METHOD</th>
+                    <th>AUTHENTICATION</th>
                     <th>REQUEST DATA BODY FORMAT</th>
                     <th>RESPONSE DATA BODY FORMAT</th>
                 </tr>
@@ -182,6 +188,7 @@
                     <td>Get all users.</td>
                     <td>/users</td>
                     <td>GET</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>
                         A JSON Object holding data about the new user and status
@@ -205,6 +212,7 @@
                     <td>Get user by username.</td>
                     <td>/users/:username</td>
                     <td>GET</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>
                         A JSON Object holding data about the new user and status
@@ -227,6 +235,7 @@
                     <td>Register new user.</td>
                     <td>/users</td>
                     <td>POST</td>
+                    <td>Bearer token</td>
                     <td>
                         A JSON Object holding information about the new user.
                         Example:
@@ -252,6 +261,7 @@
                     <td>Update a user by username.</td>
                     <td>/users/:username</td>
                     <td>PUT</td>
+                    <td>Bearer token</td>
                     <td>
                         A JSON Object holding information about the user to
                         update. Example:
@@ -286,6 +296,7 @@
                     <td>Add a movie to user's list of favorites.</td>
                     <td>/users/:username/movies/:movieId</td>
                     <td>POST</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>A JSON Object holding new data about the updated user
                         and status code <code>200</code> if sucessful. Example:
@@ -307,6 +318,7 @@
                     <td>Delete a movie from user's list of favorites.</td>
                     <td>/users/{username}/movies/{movieId}</td>
                     <td>DELETE</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>A JSON Object holding new data about the updated user
                         and status code <code>200</code> if sucessful. Example:
@@ -327,6 +339,7 @@
                     <td>Delete user registration.</td>
                     <td>/users/:username</td>
                     <td>DELETE</td>
+                    <td>Bearer token</td>
                     <td>None</td>
                     <td>Messsage confirming that the user was removed.</td>
                 </tr>
