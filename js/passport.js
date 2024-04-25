@@ -15,36 +15,47 @@ passport.use(
         },
         async (username, password, callback) => {
             console.log(`${username} ${password}`);
-            await Users.findOne({username: username})
-            .then((user) => {
-                if (!user) {
-                    console.log('incorrect username');
-                    return callback(null, false, {
-                        message: 'Incorrect username or password.',
-                    });
-                }
-                console.log('finished');
-                return callback(null, user);
-            })
-            .catch((err) => {
-                if(err) {
-                    console.log(err);
-                    return callback(err);
-                }
-            })
+            await Users.findOne({ username: username })
+                .then((user) => {
+                    if (!user) {
+                        console.log('incorrect username');
+                        return callback(null, false, {
+                            message: 'Incorrect username or password.',
+                        });
+                    }
+                    if (!user.validatePassword(password)) {
+                        console.log('incorrect password');
+                        return callback(null, false, {
+                            message: 'Incorrect password.',
+                        });
+                    }
+                    console.log('finished');
+                    return callback(null, user);
+                })
+                .catch((err) => {
+                    if (err) {
+                        console.log(err);
+                        return callback(err);
+                    }
+                });
         }
     )
 );
 
-passport.use(new JWTStrategy({
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey: '7n12kl78hFTpFGeS5Sp8XCfikheiSWlOiAf+txcIE4s='
-}, async (jwtPayload, callback) => {
-    return await Users.findById(jwtPayload._id)
-    .then((user) => {
-        return callback(null, user);
-    })
-    .catch((err) => {
-        return callback(err);
-    });
-}));
+passport.use(
+    new JWTStrategy(
+        {
+            jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+            secretOrKey: '7n12kl78hFTpFGeS5Sp8XCfikheiSWlOiAf+txcIE4s=',
+        },
+        async (jwtPayload, callback) => {
+            return await Users.findById(jwtPayload._id)
+                .then((user) => {
+                    return callback(null, user);
+                })
+                .catch((err) => {
+                    return callback(err);
+                });
+        }
+    )
+);
