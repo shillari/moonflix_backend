@@ -1,4 +1,4 @@
-const jwtSecret = '7n12kl78hFTpFGeS5Sp8XCfikheiSWlOiAf+txcIE4s=';
+const jwtSecret = process.env.JWT_SECRET;
 
 const jwt = require('jsonwebtoken'),
       passport = require('passport');
@@ -25,9 +25,12 @@ module.exports = (router) => {
           if (error) {
             res.send(error);
           }
+          // Exclude the password field from the user object
+          const userWithoutPassword = { ...user.toObject() };
+          delete userWithoutPassword.password;
           let token = generateJWTToken(user.toJSON());
-          return res.json({ user, token });
+          return res.json({ user: userWithoutPassword, token });
         });
       })(req, res);
     });
-  }
+}

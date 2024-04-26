@@ -1,6 +1,6 @@
 const passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
-    Models = require('./models'),
+    Models = require('../models/models'),
     passportJWT = require('passport-jwt');
 
 let Users = Models.User,
@@ -14,7 +14,7 @@ passport.use(
             passwordField: 'password',
         },
         async (username, password, callback) => {
-            console.log(`${username} ${password}`);
+            console.log(`${username}`);
             await Users.findOne({ username: username })
                 .then((user) => {
                     if (!user) {
@@ -46,7 +46,7 @@ passport.use(
     new JWTStrategy(
         {
             jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-            secretOrKey: '7n12kl78hFTpFGeS5Sp8XCfikheiSWlOiAf+txcIE4s=',
+            secretOrKey: process.env.JWT_SECRET,
         },
         async (jwtPayload, callback) => {
             return await Users.findById(jwtPayload._id)
