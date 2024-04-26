@@ -227,6 +227,8 @@ app.post(
         check('password', 'Password is required').not().isEmpty(),
         check('password', 'Password must contains at least 8 characteres.').isLength({ min: 8 }),
         check('email', 'Email does not appear to be valid').isEmail(),
+        check('birthday', 'Birthday must be a valid date in the format YYYY-MM-DD')
+            .isISO8601(), // Add date validation for birthday field
     ],
     async (req, res) => {
         // check the validation object for errors
@@ -375,19 +377,10 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), as
 app.put('/users/:username',
     // Validation logic here for request
     [
-        check('username', 'Username is required. Min: 5 characteres.').isLength(
-            { min: 5 }
-        ),
-        check(
-            'username',
-            'Username contains non alphanumeric characters - not allowed.'
-        ).isAlphanumeric(),
+        check('username', 'Username is required. Min: 5 characteres.').isLength({ min: 5 }),
+        check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
         check('email', 'Email does not appear to be valid').isEmail(),
-        check(
-            'birthday',
-            'Birthday must be a valid date in the format YYYY-MM-DD'
-        )
-            .optional()
+        check('birthday', 'Birthday must be a valid date in the format YYYY-MM-DD')
             .isISO8601(), // Add date validation for birthday field
     ],  passport.authenticate('jwt', { session: false }), async (req, res) => {
     // Checks if the logged user is trying to update someone else's info.
