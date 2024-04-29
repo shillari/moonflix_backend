@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken'),
       passport = require('passport');
       require('./passport');
 
+let allowedOrigins = ['*'];
+
 let generateJWTToken = (user) => {
     return jwt.sign(user, jwtSecret, {
         subject: user.username,
@@ -33,5 +35,6 @@ module.exports = (router) => {
           return res.json({ user: userWithoutPassword, token });
         });
       })(req, res);
+      res.set('Access-Control-Allow-Origin', allowedOrigins);
     });
 }
