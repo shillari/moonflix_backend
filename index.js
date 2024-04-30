@@ -37,7 +37,7 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something is wrong!');
 });
 
-// Redirect route '/' to '/new-route'
+// Redirect route '/' to '/documentation'
 app.get('/', (req, res) => {
     res.redirect('documentation.html');
 });
