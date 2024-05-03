@@ -19,8 +19,9 @@ module.exports = (router) => {
       const { username, password } = req.body; // Extract username and password from request body
       passport.authenticate('local', { session: false }, (error, user, info) => {
         if (error || !user) {
+          console.log('Error: '+error)
           return res.status(400).json({
-            message: 'Something is not right',
+            message: error ? error : 'Something is not right',
             user: user
           });
         }

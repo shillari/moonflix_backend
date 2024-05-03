@@ -399,6 +399,50 @@ app.put('/users/:username',
         });
 });
 
+app.put('/users/:username/password',
+    // Validation logic here for request
+    [
+        check('username', 'Username is required. Min: 5 characteres.').isLength({ min: 5 }),
+        check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('oldpassword', 'Password is required').not().isEmpty(),
+        check('oldpassword', 'Password must contains at least 8 characteres.').isLength({ min: 8 }),
+        check('newpassword', 'Password is required').not().isEmpty(),
+        check('newpassword', 'Password must contains at least 8 characteres.').isLength({ min: 8 })
+    ],  passport.authenticate('jwt', { session: false }), async (req, res) => {
+
+    // check the validation object for errors
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const user = await Users.findOne({ username: req.params.username })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+
+    if(!user.validatePassword(req.body.oldpassword)) {
+        return res.status(400).send('Old password does not match.');
+    }
+
+    await Users.findOneAndUpdate({ username: req.params.username }, {
+            $set: {
+                password: Users.hashPassword(req.body.newpassword)
+            },
+        },{ new: true })
+        // Prevent the 'password' field from returning.
+        .select('-password')
+        .then((updatedUser) => {
+            res.status(200).send('Password updated.');
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
 /**
  * @swagger
  * /users/{username}/movies/{movieId}:
