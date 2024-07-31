@@ -28,18 +28,18 @@ let auth = require('./config/auth')(app);
 const passport = require('passport');
 require('./config/passport');
 const cors = require('cors');
-let allowedOrigins = ['http://localhost:1234', 'https://main--moonflix-app.netlify.app'];
+let allowedOrigins = ['http://localhost:1234', 'https://main--moonflix-app.netlify.app', 'http://localhost:4200'];
 
 app.use(cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) { // If a specific origin isn’t found on the list of allowed origins
-        let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
-        return callback(new Error(message), false);
-      }
-      return callback(null, true);
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) { // If a specific origin isn’t found on the list of allowed origins
+            let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
+            return callback(new Error(message), false);
+        }
+        return callback(null, true);
     }
-  }));
+}));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use((err, req, res, next) => {
@@ -248,22 +248,22 @@ app.post(
                         email: req.body.email,
                         birthday: req.body.birthday,
                     })
-                    .then((user) => {
-                        // Exclude the password field from the response
-                        const userWithoutPassword = user.toObject();
-                        delete userWithoutPassword.password;
-                        res.status(201).json(userWithoutPassword);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        // Define a custom error handling middleware for handling duplicate email errors.
-                        // Duplicate username is handle in the function 'findOne'.
-                        if(error.name === 'MongoServerError' && error.code === 11000) {
-                            res.status(400).send('Email address is already in use.');
-                        } else {
-                            res.status(500).send('Error: ' + error);
-                        }
-                    });
+                        .then((user) => {
+                            // Exclude the password field from the response
+                            const userWithoutPassword = user.toObject();
+                            delete userWithoutPassword.password;
+                            res.status(201).json(userWithoutPassword);
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                            // Define a custom error handling middleware for handling duplicate email errors.
+                            // Duplicate username is handle in the function 'findOne'.
+                            if (error.name === 'MongoServerError' && error.code === 11000) {
+                                res.status(400).send('Email address is already in use.');
+                            } else {
+                                res.status(500).send('Error: ' + error);
+                            }
+                        });
                 }
             })
             .catch((error) => {
@@ -378,36 +378,36 @@ app.put('/users/:username',
         check('email', 'Email does not appear to be valid').isEmail(),
         check('birthday', 'Birthday must be a valid date in the format YYYY-MM-DD')
             .isISO8601(), // Add date validation for birthday field
-    ],  passport.authenticate('jwt', { session: false }), async (req, res) => {
-    // Checks if the logged user is trying to update someone else's info.
-    if (req.user.username !== req.params.username) {
-        return res.status(403).send('Permission denied');
-    }
+    ], passport.authenticate('jwt', { session: false }), async (req, res) => {
+        // Checks if the logged user is trying to update someone else's info.
+        if (req.user.username !== req.params.username) {
+            return res.status(403).send('Permission denied');
+        }
 
-    // check the validation object for errors
-    let errors = validationResult(req);
+        // check the validation object for errors
+        let errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
+        }
 
-    await Users.findOneAndUpdate({ username: req.params.username }, {
+        await Users.findOneAndUpdate({ username: req.params.username }, {
             $set: {
                 username: req.body.username,
                 email: req.body.email,
                 birthday: req.body.birthday,
             },
-        },{ new: true })
-        // Prevent the 'password' field from returning.
-        .select('-password')
-        .then((updatedUser) => {
-            res.json(updatedUser);
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
+        }, { new: true })
+            // Prevent the 'password' field from returning.
+            .select('-password')
+            .then((updatedUser) => {
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send('Error: ' + err);
+            });
+    });
 
 app.put('/users/:username/password',
     // Validation logic here for request
@@ -418,40 +418,40 @@ app.put('/users/:username/password',
         check('oldpassword', 'Password must contains at least 8 characteres.').isLength({ min: 8 }),
         check('newpassword', 'Password is required').not().isEmpty(),
         check('newpassword', 'Password must contains at least 8 characteres.').isLength({ min: 8 })
-    ],  passport.authenticate('jwt', { session: false }), async (req, res) => {
+    ], passport.authenticate('jwt', { session: false }), async (req, res) => {
 
-    // check the validation object for errors
-    let errors = validationResult(req);
+        // check the validation object for errors
+        let errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
+        }
 
-    const user = await Users.findOne({ username: req.params.username })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
+        const user = await Users.findOne({ username: req.params.username })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send('Error: ' + err);
+            });
 
-    if(!user.validatePassword(req.body.oldpassword)) {
-        return res.status(400).send('Old password does not match.');
-    }
+        if (!user.validatePassword(req.body.oldpassword)) {
+            return res.status(400).send('Old password does not match.');
+        }
 
-    await Users.findOneAndUpdate({ username: req.params.username }, {
+        await Users.findOneAndUpdate({ username: req.params.username }, {
             $set: {
                 password: Users.hashPassword(req.body.newpassword)
             },
-        },{ new: true })
-        // Prevent the 'password' field from returning.
-        .select('-password')
-        .then((updatedUser) => {
-            res.status(200).send('Password updated.');
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
+        }, { new: true })
+            // Prevent the 'password' field from returning.
+            .select('-password')
+            .then((updatedUser) => {
+                res.status(200).send('Password updated.');
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send('Error: ' + err);
+            });
+    });
 
 /**
  * @swagger
@@ -479,24 +479,24 @@ app.put('/users/:username/password',
  */
 app.post('/users/:username/movies/:movieId', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
-    // Checks if the logged user is trying to update someone else's info.
-    if (req.user.username !== req.params.username) {
-        return res.status(403).send('Permission denied');
-    }
+        // Checks if the logged user is trying to update someone else's info.
+        if (req.user.username !== req.params.username) {
+            return res.status(403).send('Permission denied');
+        }
 
-    await Users.findOneAndUpdate({ username: req.params.username }, {
+        await Users.findOneAndUpdate({ username: req.params.username }, {
             $push: { favoriteMovies: req.params.movieId },
         }, { new: true })
-        // Prevent the 'password' field from returning.
-        .select('-password')
-        .then((updatedUser) => {
-            res.json(updatedUser);
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
+            // Prevent the 'password' field from returning.
+            .select('-password')
+            .then((updatedUser) => {
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send('Error: ' + err);
+            });
+    });
 
 /**
  * @swagger
@@ -524,24 +524,24 @@ app.post('/users/:username/movies/:movieId', passport.authenticate('jwt', { sess
  */
 app.delete('/users/:username/movies/:movieId', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
-    // Checks if the logged user is trying to update someone else's info.
-    if (req.user.username !== req.params.username) {
-        return res.status(403).send('Permission denied');
-    }
+        // Checks if the logged user is trying to update someone else's info.
+        if (req.user.username !== req.params.username) {
+            return res.status(403).send('Permission denied');
+        }
 
-    await Users.findOneAndUpdate({ username: req.params.username }, {
+        await Users.findOneAndUpdate({ username: req.params.username }, {
             $pull: { favoriteMovies: req.params.movieId },
         }, { new: true })
-        // Prevent the 'password' field from returning.
-        .select('-password')
-        .then((updatedUser) => {
-            res.json(updatedUser);
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
+            // Prevent the 'password' field from returning.
+            .select('-password')
+            .then((updatedUser) => {
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send('Error: ' + err);
+            });
+    });
 
 /**
  * @swagger
