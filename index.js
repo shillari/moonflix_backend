@@ -29,7 +29,7 @@ const passport = require('passport');
 require('./config/passport');
 const cors = require('cors');
 let allowedOrigins = ['http://localhost:1234', 'https://main--moonflix-app.netlify.app', 'http://localhost:4200',
-    'https://shillari.github.io/moonflix-angular'
+    'https://shillari.github.io'
 ];
 
 app.use(cors({
