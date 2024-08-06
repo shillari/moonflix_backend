@@ -28,7 +28,9 @@ let auth = require('./config/auth')(app);
 const passport = require('passport');
 require('./config/passport');
 const cors = require('cors');
-let allowedOrigins = ['http://localhost:1234', 'https://main--moonflix-app.netlify.app', 'http://localhost:4200'];
+let allowedOrigins = ['http://localhost:1234', 'https://main--moonflix-app.netlify.app', 'http://localhost:4200',
+    'https://shillari.github.io/moonflix-angular'
+];
 
 app.use(cors({
     origin: (origin, callback) => {
